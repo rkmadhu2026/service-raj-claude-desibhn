@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Incident | LinkedEye-FinSpot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-navy: #0f1c3f;
+            --primary-blue: #2563eb;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --bg-body: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f1c3f;
+            --text-secondary: #6b7785;
+            --border-color: #e5e8eb;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-body); color: var(--text-primary); font-size: 13px; }
+
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--primary-navy); z-index: 200; }
+        .sidebar-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--info) 0%, var(--purple) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-logo i { color: #fff; font-size: 20px; }
+        .sidebar-brand { color: #fff; }
+        .sidebar-brand h1 { font-size: 16px; font-weight: 700; }
+        .sidebar-brand span { font-size: 10px; color: rgba(255,255,255,0.6); }
+        .sidebar-nav { padding: 16px 12px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-item.active { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .nav-item i { width: 20px; text-align: center; }
+        .nav-item .nav-badge { background: var(--danger); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: auto; }
+
+        .header { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--primary-blue); }
+        .breadcrumb .separator { color: var(--border-color); }
+        .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; }
+
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 24px; display: flex; gap: 24px; }
+        .form-panel { flex: 1; }
+        .sidebar-panel { width: 340px; }
+
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .page-header p { font-size: 13px; color: var(--text-secondary); }
+
+        .form-tabs { display: flex; gap: 4px; background: #f3f4f6; padding: 4px; border-radius: 10px; margin-bottom: 24px; width: fit-content; }
+        .form-tab { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border: none; background: transparent; }
+        .form-tab:hover { color: var(--text-primary); }
+        .form-tab.active { background: #fff; color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 24px; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+        .card-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: var(--primary-blue); }
+        .card-body { padding: 20px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .form-group label .required { color: var(--danger); }
+        .form-group .hint { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea {
+            width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; transition: all 0.2s; background: #fff;
+        }
+        .input-wrapper input:focus, .input-wrapper select:focus, .input-wrapper textarea:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .input-wrapper.no-icon input, .input-wrapper.no-icon select, .input-wrapper.no-icon textarea { padding-left: 12px; }
+
+        .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .form-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+
+        .priority-selector { display: flex; gap: 12px; }
+        .priority-option { flex: 1; padding: 16px; border: 2px solid var(--border-color); border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.2s; }
+        .priority-option:hover { border-color: #d1d5db; }
+        .priority-option.selected { border-color: var(--primary-blue); background: rgba(37, 99, 235, 0.05); }
+        .priority-option .priority-dot { width: 12px; height: 12px; border-radius: 50%; margin: 0 auto 8px; }
+        .priority-option.critical .priority-dot { background: var(--danger); }
+        .priority-option.high .priority-dot { background: var(--warning); }
+        .priority-option.medium .priority-dot { background: var(--info); }
+        .priority-option.low .priority-dot { background: #9ca3af; }
+        .priority-option .priority-label { font-weight: 600; font-size: 13px; }
+        .priority-option .priority-desc { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+        .category-path { display: flex; gap: 8px; align-items: center; }
+        .category-path select { flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; }
+        .category-path .arrow { color: var(--text-secondary); }
+
+        .rich-editor { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .editor-toolbar { display: flex; gap: 4px; padding: 8px 12px; background: #f9fafb; border-bottom: 1px solid var(--border-color); }
+        .editor-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: var(--text-secondary); }
+        .editor-btn:hover { background: #e5e7eb; color: var(--text-primary); }
+        .editor-content { min-height: 150px; padding: 12px; }
+        .editor-content:focus { outline: none; }
+
+        .file-upload { border: 2px dashed var(--border-color); border-radius: 10px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .file-upload:hover { border-color: var(--primary-blue); background: rgba(37, 99, 235, 0.02); }
+        .file-upload i { font-size: 32px; color: var(--text-secondary); margin-bottom: 12px; }
+        .file-upload p { font-size: 13px; color: var(--text-secondary); }
+        .file-upload .browse { color: var(--primary-blue); font-weight: 600; }
+
+        .ai-suggestions { background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); border: 1px solid #c7d2fe; border-radius: 10px; padding: 16px; }
+        .ai-suggestions-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .ai-suggestions-header i { color: var(--purple); }
+        .ai-suggestions-header span { font-weight: 600; font-size: 13px; color: var(--purple); }
+        .suggestion-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; font-size: 12px; }
+        .suggestion-item i { color: var(--success); }
+        .suggestion-item a { color: var(--primary-blue); text-decoration: none; }
+        .suggestion-item a:hover { text-decoration: underline; }
+
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; padding: 20px; border-top: 1px solid var(--border-color); background: #f9fafb; border-radius: 0 0 12px 12px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-secondary { background: #fff; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: #f9fafb; }
+
+        .template-card { padding: 16px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+        .template-card:hover { border-color: var(--primary-blue); background: rgba(37, 99, 235, 0.02); }
+        .template-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+        .template-card p { font-size: 11px; color: var(--text-secondary); }
+
+        .ci-search-results { max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 8px; display: none; }
+        .ci-search-results.show { display: block; }
+        .ci-result { display: flex; align-items: center; gap: 12px; padding: 10px 12px; cursor: pointer; }
+        .ci-result:hover { background: #f9fafb; }
+        .ci-result .ci-icon { width: 32px; height: 32px; background: rgba(139, 92, 246, 0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--purple); }
+        .ci-result .ci-info .ci-name { font-weight: 600; font-size: 12px; }
+        .ci-result .ci-info .ci-type { font-size: 11px; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-eye"></i></div>
+            <div class="sidebar-brand"><h1>LinkedEye</h1><span>FinSpot Enterprise</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="linkedeye-dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+            <a href="linkedeye-incidents.html" class="nav-item active"><i class="fas fa-exclamation-triangle"></i><span>Incidents</span><span class="nav-badge">23</span></a>
+            <a href="linkedeye-change-calendar.html" class="nav-item"><i class="fas fa-code-branch"></i><span>Changes</span></a>
+            <a href="linkedeye-assets.html" class="nav-item"><i class="fas fa-cubes"></i><span>Assets</span></a>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="breadcrumb">
+            <a href="linkedeye-dashboard.html">Dashboard</a><span class="separator">/</span>
+            <a href="linkedeye-incidents.html">Incidents</a><span class="separator">/</span>
+            <span class="current">Create New</span>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar">RM</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="form-panel">
+            <div class="page-header">
+                <h1>Create New Incident</h1>
+                <p>Report a new incident for investigation and resolution</p>
+            </div>
+
+            <div class="form-tabs">
+                <button class="form-tab active">Quick Create</button>
+                <button class="form-tab">Detailed Form</button>
+                <button class="form-tab">From Template</button>
+            </div>
+
+            <form id="incidentForm">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title"><i class="fas fa-edit"></i> Incident Information</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Short Description <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-heading"></i>
+                                <input type="text" id="shortDesc" placeholder="Brief description of the incident" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Configuration Item</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="ciSearch" placeholder="Search servers, devices, applications..." oninput="searchCI(this.value)">
+                            </div>
+                            <div class="ci-search-results" id="ciResults">
+                                <div class="ci-result" onclick="selectCI('prod-db-01.fs-mum-indmoney-prod-le', 'PostgreSQL Database')">
+                                    <div class="ci-icon"><i class="fas fa-database"></i></div>
+                                    <div class="ci-info"><div class="ci-name">prod-db-01.fs-mum-indmoney-prod-le</div><div class="ci-type">PostgreSQL Database</div></div>
+                                </div>
+                                <div class="ci-result" onclick="selectCI('trading-engine-01.neo-prod-le', 'Application Server')">
+                                    <div class="ci-icon"><i class="fas fa-server"></i></div>
+                                    <div class="ci-info"><div class="ci-name">trading-engine-01.neo-prod-le</div><div class="ci-type">Application Server</div></div>
+                                </div>
+                                <div class="ci-result" onclick="selectCI('sw-core-01.fs-dx-le', 'Network Switch')">
+                                    <div class="ci-icon"><i class="fas fa-network-wired"></i></div>
+                                    <div class="ci-info"><div class="ci-name">sw-core-01.fs-dx-le</div><div class="ci-type">Network Switch</div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Priority <span class="required">*</span></label>
+                            <div class="priority-selector">
+                                <div class="priority-option critical" onclick="selectPriority(this, 1)">
+                                    <div class="priority-dot"></div>
+                                    <div class="priority-label">1 - Critical</div>
+                                    <div class="priority-desc">Trading down</div>
+                                </div>
+                                <div class="priority-option high" onclick="selectPriority(this, 2)">
+                                    <div class="priority-dot"></div>
+                                    <div class="priority-label">2 - High</div>
+                                    <div class="priority-desc">Major impact</div>
+                                </div>
+                                <div class="priority-option medium selected" onclick="selectPriority(this, 3)">
+                                    <div class="priority-dot"></div>
+                                    <div class="priority-label">3 - Medium</div>
+                                    <div class="priority-desc">Degraded</div>
+                                </div>
+                                <div class="priority-option low" onclick="selectPriority(this, 4)">
+                                    <div class="priority-dot"></div>
+                                    <div class="priority-label">4 - Low</div>
+                                    <div class="priority-desc">Minor issue</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Category</label>
+                            <div class="category-path">
+                                <select id="category">
+                                    <option value="">Select category...</option>
+                                    <option value="hardware">Hardware</option>
+                                    <option value="software">Software</option>
+                                    <option value="network">Network</option>
+                                    <option value="database" selected>Database</option>
+                                    <option value="security">Security</option>
+                                </select>
+                                <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                                <select id="subcategory">
+                                    <option value="">Subcategory...</option>
+                                    <option value="postgresql" selected>PostgreSQL</option>
+                                    <option value="mysql">MySQL</option>
+                                    <option value="mongodb">MongoDB</option>
+                                </select>
+                                <span class="arrow"><i class="fas fa-chevron-right"></i></span>
+                                <select id="item">
+                                    <option value="">Item...</option>
+                                    <option value="connection" selected>Connection Pool</option>
+                                    <option value="performance">Performance</option>
+                                    <option value="replication">Replication</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label>Assignment Group</label>
+                                <div class="input-wrapper no-icon">
+                                    <select id="assignmentGroup">
+                                        <option value="">Select group...</option>
+                                        <option value="infra-ops" selected>Infrastructure Operations</option>
+                                        <option value="network-ops">Network Operations</option>
+                                        <option value="dba">Database Administration</option>
+                                        <option value="devops">DevOps Team</option>
+                                        <option value="security">Security Team</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Assigned To</label>
+                                <div class="input-wrapper no-icon">
+                                    <select id="assignedTo">
+                                        <option value="auto">Auto (Smart Routing)</option>
+                                        <option value="rajkumar">Rajkumar Madhu</option>
+                                        <option value="siva">Siva Kadirannagari</option>
+                                        <option value="hoysala">Hoysala Bise</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Description</label>
+                            <div class="rich-editor">
+                                <div class="editor-toolbar">
+                                    <button type="button" class="editor-btn"><i class="fas fa-bold"></i></button>
+                                    <button type="button" class="editor-btn"><i class="fas fa-italic"></i></button>
+                                    <button type="button" class="editor-btn"><i class="fas fa-underline"></i></button>
+                                    <button type="button" class="editor-btn"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" class="editor-btn"><i class="fas fa-list-ol"></i></button>
+                                    <button type="button" class="editor-btn"><i class="fas fa-link"></i></button>
+                                    <button type="button" class="editor-btn"><i class="fas fa-code"></i></button>
+                                </div>
+                                <div class="editor-content" contenteditable="true" placeholder="Detailed description of the incident..."></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Attachments</label>
+                            <div class="file-upload">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag files here or <span class="browse">click to browse</span></p>
+                                <p style="font-size: 11px; margin-top: 8px;">Screenshots, logs, config files (max 25MB)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="button" class="btn btn-secondary"><i class="fas fa-save"></i> Save as Draft</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Incident</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar Panel -->
+        <div class="sidebar-panel">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-lightbulb"></i> AI Suggestions</span>
+                </div>
+                <div class="card-body">
+                    <div class="ai-suggestions">
+                        <div class="ai-suggestions-header">
+                            <i class="fas fa-brain"></i>
+                            <span>Based on "CPU high"</span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Assign to: <strong>Infrastructure Ops</strong></span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Related runbook: <a href="#">CPU_High_Remediation</a></span>
+                        </div>
+                        <div class="suggestion-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Similar: <a href="#">INC0012456</a>, <a href="#">INC0013789</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-file-alt"></i> Templates</span>
+                </div>
+                <div class="card-body">
+                    <div class="template-card">
+                        <h4><i class="fas fa-database" style="color: var(--purple);"></i> Database Issue</h4>
+                        <p>Connection pool, replication, slow queries</p>
+                    </div>
+                    <div class="template-card">
+                        <h4><i class="fas fa-server" style="color: var(--info);"></i> Server Alert</h4>
+                        <p>CPU, memory, disk space alerts</p>
+                    </div>
+                    <div class="template-card">
+                        <h4><i class="fas fa-network-wired" style="color: var(--success);"></i> Network Issue</h4>
+                        <p>Latency, connectivity, switch/router</p>
+                    </div>
+                    <div class="template-card">
+                        <h4><i class="fas fa-lock" style="color: var(--danger);"></i> Security Incident</h4>
+                        <p>Unauthorized access, vulnerability</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-info-circle"></i> Help</span>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                        <strong>Priority Guidelines:</strong><br>
+                        <span style="color: var(--danger);">Critical</span>: Trading systems down<br>
+                        <span style="color: var(--warning);">High</span>: Major service impact<br>
+                        <span style="color: var(--info);">Medium</span>: Degraded performance<br>
+                        <span style="color: #9ca3af;">Low</span>: Minor issues
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function selectPriority(el, priority) {
+            document.querySelectorAll('.priority-option').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function searchCI(query) {
+            const results = document.getElementById('ciResults');
+            results.classList.toggle('show', query.length > 0);
+        }
+
+        function selectCI(name, type) {
+            document.getElementById('ciSearch').value = name;
+            document.getElementById('ciResults').classList.remove('show');
+        }
+
+        document.getElementById('incidentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Incident created successfully! Redirecting to INC0015848...');
+            window.location.href = 'linkedeye-incidents.html';
+        });
+
+        document.querySelectorAll('.form-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

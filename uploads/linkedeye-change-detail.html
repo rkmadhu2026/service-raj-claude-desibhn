@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHG0012456 | LinkedEye-FinSpot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-navy: #0f1c3f;
+            --primary-blue: #2563eb;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --bg-body: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f1c3f;
+            --text-secondary: #6b7785;
+            --border-color: #e5e8eb;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-body); color: var(--text-primary); font-size: 13px; }
+
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--primary-navy); z-index: 200; }
+        .sidebar-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--info) 0%, var(--purple) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-logo i { color: #fff; font-size: 20px; }
+        .sidebar-brand { color: #fff; }
+        .sidebar-brand h1 { font-size: 16px; font-weight: 700; }
+        .sidebar-brand span { font-size: 10px; color: rgba(255,255,255,0.6); }
+        .sidebar-nav { padding: 16px 12px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-item.active { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .nav-item i { width: 20px; text-align: center; }
+
+        .header { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--primary-blue); }
+        .breadcrumb .separator { color: var(--border-color); }
+        .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; }
+
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); display: flex; }
+        .main-panel { flex: 1; padding: 24px; overflow-y: auto; height: calc(100vh - var(--header-height)); }
+        .right-sidebar { width: 340px; background: var(--bg-card); border-left: 1px solid var(--border-color); padding: 24px; overflow-y: auto; height: calc(100vh - var(--header-height)); }
+
+        .change-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+        .change-title-section { flex: 1; }
+        .change-badges { display: flex; gap: 8px; margin-bottom: 12px; }
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge.type-normal { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .badge.status-scheduled { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+        .change-number { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .change-short-desc { font-size: 16px; color: var(--text-secondary); }
+
+        .action-buttons { display: flex; gap: 8px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-secondary { background: #fff; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-icon { width: 40px; padding: 10px; justify-content: center; }
+
+        .approval-workflow { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #93c5fd; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+        .approval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .approval-header h3 { font-size: 14px; font-weight: 600; color: var(--primary-blue); display: flex; align-items: center; gap: 8px; }
+        .approval-progress { font-size: 13px; color: var(--primary-blue); font-weight: 600; }
+        .approval-steps { display: flex; justify-content: space-between; position: relative; }
+        .approval-steps::before { content: ''; position: absolute; top: 20px; left: 60px; right: 60px; height: 2px; background: #93c5fd; }
+        .approval-step { text-align: center; position: relative; z-index: 1; }
+        .step-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 16px; }
+        .step-icon.approved { background: var(--success); color: #fff; }
+        .step-icon.pending { background: #fff; border: 2px solid var(--warning); color: var(--warning); }
+        .step-icon.waiting { background: #e5e7eb; color: #9ca3af; }
+        .step-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+        .step-status { font-size: 11px; color: var(--text-secondary); }
+        .step-status.approved { color: var(--success); }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 24px; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: var(--primary-blue); }
+        .card-body { padding: 20px; }
+
+        .details-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .detail-item { display: flex; flex-direction: column; gap: 4px; }
+        .detail-item .label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+        .detail-item .value { font-size: 13px; color: var(--text-primary); }
+        .detail-item .value.link { color: var(--primary-blue); cursor: pointer; }
+
+        .plan-section { margin-bottom: 20px; }
+        .plan-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .plan-section h4 i { color: var(--primary-blue); }
+        .plan-steps { padding-left: 20px; }
+        .plan-step { display: flex; gap: 12px; margin-bottom: 12px; }
+        .step-number { width: 24px; height: 24px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+        .step-text { font-size: 13px; line-height: 1.5; }
+
+        .config-diff { background: #1a1a1a; border-radius: 8px; overflow: hidden; }
+        .diff-header { padding: 12px 16px; background: #252525; display: flex; justify-content: space-between; align-items: center; }
+        .diff-header h4 { color: #fff; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+        .diff-header h4 i { color: var(--success); }
+        .diff-content { padding: 16px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        .diff-line { padding: 2px 0; }
+        .diff-line.added { color: var(--success); }
+        .diff-line.removed { color: var(--danger); }
+        .diff-line.context { color: #6b7280; }
+
+        .test-results { margin-top: 16px; }
+        .test-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; }
+        .test-icon { font-size: 16px; }
+        .test-icon.passed { color: var(--success); }
+        .test-icon.running { color: var(--info); }
+        .test-icon.pending { color: #9ca3af; }
+        .test-info { flex: 1; }
+        .test-info .test-name { font-weight: 600; font-size: 13px; }
+        .test-info .test-status { font-size: 11px; color: var(--text-secondary); }
+
+        .sidebar-section { margin-bottom: 24px; }
+        .sidebar-section-title { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; }
+
+        .schedule-widget { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d; border-radius: 10px; padding: 16px; text-align: center; }
+        .schedule-widget .schedule-date { font-size: 24px; font-weight: 700; color: var(--primary-navy); }
+        .schedule-widget .schedule-time { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+        .schedule-widget .schedule-duration { font-size: 12px; color: var(--warning); margin-top: 8px; }
+
+        .risk-widget { padding: 16px; background: #f9fafb; border-radius: 10px; }
+        .risk-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .risk-level { font-size: 18px; font-weight: 700; }
+        .risk-level.medium { color: var(--warning); }
+        .risk-items { font-size: 12px; color: var(--text-secondary); }
+        .risk-items li { margin-bottom: 4px; }
+
+        .ci-tree { font-size: 12px; }
+        .ci-tree-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border-color); }
+        .ci-tree-item:last-child { border-bottom: none; }
+        .ci-tree-item i { color: var(--purple); }
+        .ci-tree-item .ci-name { font-weight: 500; }
+        .ci-tree-item .ci-type { font-size: 11px; color: var(--text-secondary); }
+
+        .related-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        .related-item:last-child { border-bottom: none; }
+        .related-item .item-icon { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .related-item .item-icon.incident { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .related-item .item-icon.problem { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .related-item .item-info .item-id { font-weight: 600; color: var(--primary-blue); font-size: 12px; }
+        .related-item .item-info .item-name { font-size: 11px; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-eye"></i></div>
+            <div class="sidebar-brand"><h1>LinkedEye</h1><span>FinSpot Enterprise</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="linkedeye-dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+            <a href="linkedeye-incidents.html" class="nav-item"><i class="fas fa-exclamation-triangle"></i><span>Incidents</span></a>
+            <a href="linkedeye-change-calendar.html" class="nav-item active"><i class="fas fa-code-branch"></i><span>Changes</span></a>
+            <a href="linkedeye-problem-detail.html" class="nav-item"><i class="fas fa-search"></i><span>Problems</span></a>
+            <a href="linkedeye-assets.html" class="nav-item"><i class="fas fa-cubes"></i><span>Assets</span></a>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="breadcrumb">
+            <a href="linkedeye-dashboard.html">Dashboard</a><span class="separator">/</span>
+            <a href="linkedeye-change-calendar.html">Changes</a><span class="separator">/</span>
+            <span class="current">CHG0012456</span>
+        </div>
+        <div class="user-avatar">RM</div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="main-panel">
+            <!-- Change Header -->
+            <div class="change-header">
+                <div class="change-title-section">
+                    <div class="change-badges">
+                        <span class="badge type-normal"><i class="fas fa-code-branch"></i> Normal Change</span>
+                        <span class="badge status-scheduled"><i class="fas fa-calendar-check"></i> Scheduled</span>
+                    </div>
+                    <h1 class="change-number">CHG0012456</h1>
+                    <p class="change-short-desc">Network VLAN Configuration Update for Trading Floor</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary btn-icon" title="Print"><i class="fas fa-print"></i></button>
+                    <button class="btn btn-secondary"><i class="fas fa-edit"></i> Edit</button>
+                    <button class="btn btn-success"><i class="fas fa-play"></i> Implement</button>
+                </div>
+            </div>
+
+            <!-- Approval Workflow -->
+            <div class="approval-workflow">
+                <div class="approval-header">
+                    <h3><i class="fas fa-check-circle"></i> Approval Workflow</h3>
+                    <span class="approval-progress">2/3 Approved</span>
+                </div>
+                <div class="approval-steps">
+                    <div class="approval-step">
+                        <div class="step-icon approved"><i class="fas fa-check"></i></div>
+                        <div class="step-name">Network Manager</div>
+                        <div class="step-status approved">Approved by Siva K.</div>
+                    </div>
+                    <div class="approval-step">
+                        <div class="step-icon approved"><i class="fas fa-check"></i></div>
+                        <div class="step-name">CAB</div>
+                        <div class="step-status approved">Approved Dec 10</div>
+                    </div>
+                    <div class="approval-step">
+                        <div class="step-icon pending"><i class="fas fa-clock"></i></div>
+                        <div class="step-name">CISO</div>
+                        <div class="step-status">Pending Review</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Change Details -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-info-circle"></i> Change Details</span>
+                </div>
+                <div class="card-body">
+                    <div class="details-grid">
+                        <div class="detail-item"><span class="label">Number</span><span class="value">CHG0012456</span></div>
+                        <div class="detail-item"><span class="label">Type</span><span class="value">Normal</span></div>
+                        <div class="detail-item"><span class="label">Risk</span><span class="value">Medium</span></div>
+                        <div class="detail-item"><span class="label">State</span><span class="value">Scheduled</span></div>
+                        <div class="detail-item"><span class="label">Requested By</span><span class="value link">Edukondalu P.</span></div>
+                        <div class="detail-item"><span class="label">Implementer</span><span class="value link">Network Team</span></div>
+                        <div class="detail-item"><span class="label">Start Date</span><span class="value">Dec 11, 2025 22:00 IST</span></div>
+                        <div class="detail-item"><span class="label">End Date</span><span class="value">Dec 11, 2025 23:30 IST</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implementation Plan -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-tasks"></i> Implementation Plan</span>
+                </div>
+                <div class="card-body">
+                    <div class="plan-section">
+                        <h4><i class="fas fa-arrow-right"></i> Implementation Steps</h4>
+                        <div class="plan-steps">
+                            <div class="plan-step"><div class="step-number">1</div><div class="step-text">Backup current switch configurations using RANCID</div></div>
+                            <div class="plan-step"><div class="step-number">2</div><div class="step-text">Apply VLAN 100 configuration to SW-01 (GigabitEthernet 1/0/1-24)</div></div>
+                            <div class="plan-step"><div class="step-number">3</div><div class="step-text">Apply VLAN 100 configuration to SW-02 (GigabitEthernet 1/0/1-24)</div></div>
+                            <div class="plan-step"><div class="step-number">4</div><div class="step-text">Verify connectivity between trading floor endpoints</div></div>
+                            <div class="plan-step"><div class="step-number">5</div><div class="step-text">Update network documentation and CMDB</div></div>
+                        </div>
+                    </div>
+
+                    <div class="plan-section">
+                        <h4><i class="fas fa-undo"></i> Backout Plan</h4>
+                        <div class="plan-steps">
+                            <div class="plan-step"><div class="step-number">1</div><div class="step-text">Restore configurations from RANCID backup</div></div>
+                            <div class="plan-step"><div class="step-number">2</div><div class="step-text">Verify restoration by checking VLAN assignments</div></div>
+                            <div class="plan-step"><div class="step-number">3</div><div class="step-text">Notify impacted teams via Slack #network-ops</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Diff -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-code"></i> Configuration Changes (Git)</span>
+                    <a href="#" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;"><i class="fab fa-git-alt"></i> View in Git</a>
+                </div>
+                <div class="card-body">
+                    <div class="config-diff">
+                        <div class="diff-header">
+                            <h4><i class="fas fa-file-code"></i> SW-01-config.txt</h4>
+                        </div>
+                        <div class="diff-content">
+                            <div class="diff-line context">interface GigabitEthernet1/0/1</div>
+                            <div class="diff-line removed">- switchport access vlan 10</div>
+                            <div class="diff-line added">+ switchport access vlan 100</div>
+                            <div class="diff-line context"> switchport mode access</div>
+                            <div class="diff-line context">!</div>
+                            <div class="diff-line context">interface GigabitEthernet1/0/2</div>
+                            <div class="diff-line removed">- switchport access vlan 10</div>
+                            <div class="diff-line added">+ switchport access vlan 100</div>
+                            <div class="diff-line context"> switchport mode access</div>
+                        </div>
+                    </div>
+
+                    <div class="test-results">
+                        <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 12px;">Testing Results</h4>
+                        <div class="test-item">
+                            <div class="test-icon passed"><i class="fas fa-check-circle"></i></div>
+                            <div class="test-info"><div class="test-name">Pre-change Health Check</div><div class="test-status">Passed - All devices reachable</div></div>
+                        </div>
+                        <div class="test-item">
+                            <div class="test-icon pending"><i class="fas fa-clock"></i></div>
+                            <div class="test-info"><div class="test-name">Implementation</div><div class="test-status">Scheduled - Dec 11, 22:00</div></div>
+                        </div>
+                        <div class="test-item">
+                            <div class="test-icon pending"><i class="fas fa-clock"></i></div>
+                            <div class="test-info"><div class="test-name">Post-change Validation</div><div class="test-status">Scheduled - Dec 11, 23:15</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Schedule</div>
+                <div class="schedule-widget">
+                    <div class="schedule-date">Dec 11, 2025</div>
+                    <div class="schedule-time">22:00 - 23:30 IST</div>
+                    <div class="schedule-duration"><i class="fas fa-clock"></i> Duration: 90 minutes</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Risk Assessment</div>
+                <div class="risk-widget">
+                    <div class="risk-header">
+                        <span class="risk-level medium">Medium Risk</span>
+                    </div>
+                    <ul class="risk-items">
+                        <li>2 network devices impacted</li>
+                        <li>15 minute estimated rollback</li>
+                        <li>Trading floor connectivity</li>
+                        <li>Post-market hours scheduled</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Impacted CIs</div>
+                <div class="ci-tree">
+                    <div class="ci-tree-item"><i class="fas fa-network-wired"></i><div><div class="ci-name">SW-01.fs-dx-le</div><div class="ci-type">Cisco Catalyst 9300</div></div></div>
+                    <div class="ci-tree-item"><i class="fas fa-network-wired"></i><div><div class="ci-name">SW-02.fs-dx-le</div><div class="ci-type">Cisco Catalyst 9300</div></div></div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Related Records</div>
+                <div class="related-item">
+                    <div class="item-icon incident"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="item-info"><div class="item-id">INC0015847</div><div class="item-name">Network Latency Spike</div></div>
+                </div>
+                <div class="related-item">
+                    <div class="item-icon problem"><i class="fas fa-search"></i></div>
+                    <div class="item-info"><div class="item-id">PRB0003421</div><div class="item-name">VLAN Segmentation Issues</div></div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Approvers</div>
+                <div style="font-size: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span><strong>Siva K.</strong> - Network Manager</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <span><strong>CAB</strong> - Change Advisory Board</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+                        <i class="fas fa-clock" style="color: var(--warning);"></i>
+                        <span><strong>Sarah K.</strong> - CISO (Pending)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

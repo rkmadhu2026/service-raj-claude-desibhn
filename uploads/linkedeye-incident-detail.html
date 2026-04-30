@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INC0015847 | LinkedEye-FinSpot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-navy: #0f1c3f;
+            --primary-blue: #2563eb;
+            --primary-blue-light: #3b82f6;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --bg-body: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f1c3f;
+            --text-secondary: #6b7785;
+            --border-color: #e5e8eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        /* Sidebar - Compact */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-navy);
+            z-index: 200;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-blue-light) 0%, var(--purple) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-logo i {
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .sidebar-brand {
+            color: #fff;
+        }
+
+        .sidebar-brand h1 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .sidebar-brand span {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            overflow-y: auto;
+            height: calc(100vh - 140px);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+            color: #fff;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item .nav-badge {
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .env-selector {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .env-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-blue);
+        }
+
+        .breadcrumb .separator {
+            color: var(--border-color);
+        }
+
+        .breadcrumb .current {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        .header-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .header-btn .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            display: flex;
+        }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            width: 320px;
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+
+        /* Incident Header */
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .incident-title-section {
+            flex: 1;
+        }
+
+        .incident-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge.priority-critical {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .badge.status-in-progress {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .incident-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .incident-short-desc {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-icon {
+            width: 40px;
+            padding: 10px;
+            justify-content: center;
+        }
+
+        /* Auto-Created Banner */
+        .auto-created-banner {
+            background: linear-gradient(135deg, var(--purple) 0%, #6d28d9 100%);
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .auto-created-banner .icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .auto-created-banner .content {
+            flex: 1;
+        }
+
+        .auto-created-banner .content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .auto-created-banner .content p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .auto-created-banner .metrics {
+            display: flex;
+            gap: 24px;
+        }
+
+        .auto-created-banner .metric {
+            text-align: center;
+        }
+
+        .auto-created-banner .metric .value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .auto-created-banner .metric .label {
+            font-size: 10px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary-blue);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-item .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item .value {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .detail-item .value.link {
+            color: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        .detail-item .value.link:hover {
+            text-decoration: underline;
+        }
+
+        /* Grafana Embed */
+        .grafana-embed {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .grafana-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .grafana-header h4 {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grafana-header h4 i {
+            color: #ff9800;
+        }
+
+        .grafana-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .grafana-actions button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .grafana-actions button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .chart-container {
+            height: 180px;
+            position: relative;
+        }
+
+        /* Loki Logs */
+        .loki-logs {
+            background: #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .loki-header {
+            padding: 12px 16px;
+            background: #252525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loki-header h4 {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loki-header h4 i {
+            color: #9c27b0;
+        }
+
+        .log-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-controls button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .log-stream {
+            padding: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 12px;
+            padding: 2px 0;
+        }
+
+        .log-line .timestamp {
+            color: #6b7280;
+            flex-shrink: 0;
+        }
+
+        .log-line .level {
+            width: 50px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .log-line .level.error {
+            color: #ef4444;
+        }
+
+        .log-line .level.warn {
+            color: #f59e0b;
+        }
+
+        .log-line .level.info {
+            color: #3b82f6;
+        }
+
+        .log-line .message {
+            color: #d1d5db;
+        }
+
+        /* StackStorm Workflow */
+        .workflow-timeline {
+            padding: 0;
+        }
+
+        .workflow-step {
+            display: flex;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .workflow-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-icon.completed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .step-icon.running {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .step-icon.pending {
+            background: rgba(107, 114, 128, 0.1);
+            color: #9ca3af;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content .step-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .step-content .step-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .step-duration {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Right Sidebar Sections */
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        /* SLA Widget */
+        .sla-widget {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #86efac;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .sla-widget.warning {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #fcd34d;
+        }
+
+        .sla-widget.critical {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border-color: #fca5a5;
+        }
+
+        .sla-widget .sla-time {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 4px;
+        }
+
+        .sla-widget.warning .sla-time {
+            color: var(--warning);
+        }
+
+        .sla-widget.critical .sla-time {
+            color: var(--danger);
+        }
+
+        .sla-widget .sla-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .sla-widget .sla-progress {
+            margin-top: 12px;
+            height: 6px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .sla-widget .sla-progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            background: var(--success);
+        }
+
+        .sla-widget.warning .sla-progress-bar {
+            background: var(--warning);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background: #f3f4f6;
+            border-color: var(--primary-blue);
+        }
+
+        .quick-action-btn i {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-blue);
+        }
+
+        .quick-action-btn .action-text {
+            flex: 1;
+        }
+
+        .quick-action-btn .action-text .title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .quick-action-btn .action-text .desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            border: 2px solid var(--bg-card);
+        }
+
+        .timeline-item.current::before {
+            background: var(--success);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+        }
+
+        .timeline-item .timeline-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+
+        .timeline-item .timeline-text {
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        /* Related Items */
+        .related-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .related-item:last-child {
+            border-bottom: none;
+        }
+
+        .related-item .item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .related-item .item-icon.change {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .related-item .item-icon.problem {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .related-item .item-icon.ci {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--purple);
+        }
+
+        .related-item .item-info {
+            flex: 1;
+        }
+
+        .related-item .item-info .item-id {
+            font-weight: 600;
+            color: var(--primary-blue);
+            font-size: 12px;
+        }
+
+        .related-item .item-info .item-name {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Notes List */
+        .notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .note-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .note-author {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .note-author-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .note-author-name {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .note-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .note-content {
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .note-input-wrapper {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .note-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            resize: none;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="sidebar-brand">
+                <h1>LinkedEye</h1>
+                <span>FinSpot Enterprise</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="linkedeye-dashboard.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="linkedeye-incidents.html" class="nav-item active">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Incidents</span>
+                <span class="nav-badge">23</span>
+            </a>
+            <a href="linkedeye-change-calendar.html" class="nav-item">
+                <i class="fas fa-code-branch"></i>
+                <span>Changes</span>
+            </a>
+            <a href="linkedeye-problem-detail.html" class="nav-item">
+                <i class="fas fa-search"></i>
+                <span>Problems</span>
+            </a>
+            <a href="linkedeye-network-topology.html" class="nav-item">
+                <i class="fas fa-network-wired"></i>
+                <span>Network</span>
+            </a>
+            <a href="linkedeye-assets.html" class="nav-item">
+                <i class="fas fa-cubes"></i>
+                <span>Assets</span>
+            </a>
+            <a href="linkedeye-reports.html" class="nav-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="linkedeye-integrations.html" class="nav-item">
+                <i class="fas fa-plug"></i>
+                <span>Integrations</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="env-selector">
+                <div class="env-dot"></div>
+                <span>fs-mum-indmoney-prod-le</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="breadcrumb">
+                <a href="linkedeye-dashboard.html">Dashboard</a>
+                <span class="separator">/</span>
+                <a href="linkedeye-incidents.html">Incidents</a>
+                <span class="separator">/</span>
+                <span class="current">INC0015847</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="header-btn" title="Notifications" style="position: relative;">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </button>
+            <div class="user-avatar">RM</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <!-- Incident Header -->
+            <div class="incident-header">
+                <div class="incident-title-section">
+                    <div class="incident-badges">
+                        <span class="badge priority-critical"><i class="fas fa-fire"></i> 1 - Critical</span>
+                        <span class="badge status-in-progress"><i class="fas fa-spinner fa-spin"></i> In Progress</span>
+                    </div>
+                    <h1 class="incident-number">INC0015847</h1>
+                    <p class="incident-short-desc">Database Connection Pool Exhaustion - Critical Impact on Trading Operations</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary btn-icon" title="Print">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button class="btn btn-secondary btn-icon" title="Clone">
+                        <i class="fas fa-clone"></i>
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Reassign
+                    </button>
+                    <button class="btn btn-success">
+                        <i class="fas fa-check"></i> Resolve
+                    </button>
+                </div>
+            </div>
+
+            <!-- Auto-Created Banner -->
+            <div class="auto-created-banner">
+                <div class="icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="content">
+                    <h4>Auto-Created from Prometheus Alert</h4>
+                    <p>AlertRule: PostgreSQLConnectionPoolExhausted | Server: prod-db-01.fs-mum-indmoney-prod-le</p>
+                </div>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="value">91%</div>
+                        <div class="label">Pool Usage</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">248</div>
+                        <div class="label">Active Conn</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">12m</div>
+                        <div class="label">Duration</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Incident Details -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-info-circle"></i> Incident Details</span>
+                </div>
+                <div class="card-body">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="label">Number</span>
+                            <span class="value">INC0015847</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">State</span>
+                            <span class="value">In Progress</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Priority</span>
+                            <span class="value">1 - Critical</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Impact</span>
+                            <span class="value">High - Trading Operations</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Assigned To</span>
+                            <span class="value link">Rajkumar Madhu</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Assignment Group</span>
+                            <span class="value">Infrastructure Operations</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Category</span>
+                            <span class="value">Database → PostgreSQL → Connection Pool</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Environment</span>
+                            <span class="value">fs-mum-indmoney-prod-le</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Configuration Item</span>
+                            <span class="value link">prod-db-01.fs-mum-indmoney-prod-le</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Created</span>
+                            <span class="value">Dec 24, 2025 14:20:45 IST</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grafana Metrics -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-chart-area"></i> Grafana Metrics - Live</span>
+                    <a href="#" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                        <i class="fas fa-external-link-alt"></i> Open in Grafana
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="grafana-embed">
+                        <div class="grafana-header">
+                            <h4><i class="fas fa-database"></i> PostgreSQL Connection Pool Usage</h4>
+                            <div class="grafana-actions">
+                                <button>Last 30m</button>
+                                <button><i class="fas fa-expand"></i></button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="cpuChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Loki Logs -->
+                    <div class="loki-logs">
+                        <div class="loki-header">
+                            <h4><i class="fas fa-scroll"></i> Live Logs (Loki)</h4>
+                            <div class="log-controls">
+                                <button>Filter: ERROR</button>
+                                <button><i class="fas fa-pause"></i></button>
+                            </div>
+                        </div>
+                        <div class="log-stream">
+                            <div class="log-line">
+                                <span class="timestamp">14:32:15</span>
+                                <span class="level error">ERROR</span>
+                                <span class="message">Connection pool exhausted - unable to acquire connection within 30000ms</span>
+                            </div>
+                            <div class="log-line">
+                                <span class="timestamp">14:32:10</span>
+                                <span class="level error">ERROR</span>
+                                <span class="message">PostgreSQL connection timeout - pool size: 250/256</span>
+                            </div>
+                            <div class="log-line">
+                                <span class="timestamp">14:32:05</span>
+                                <span class="level warn">WARN</span>
+                                <span class="message">Connection pool usage exceeds 90% threshold - current: 91.4%</span>
+                            </div>
+                            <div class="log-line">
+                                <span class="timestamp">14:31:58</span>
+                                <span class="level warn">WARN</span>
+                                <span class="message">High number of pending connection requests: 45</span>
+                            </div>
+                            <div class="log-line">
+                                <span class="timestamp">14:31:52</span>
+                                <span class="level info">INFO</span>
+                                <span class="message">Trading API request queue depth: 234</span>
+                            </div>
+                            <div class="log-line">
+                                <span class="timestamp">14:31:45</span>
+                                <span class="level warn">WARN</span>
+                                <span class="message">Slow query detected: execution time 12.5s (threshold: 5s)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- StackStorm Auto-Remediation -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-robot"></i> StackStorm Auto-Remediation</span>
+                    <span style="font-size: 12px; color: var(--purple);">
+                        <i class="fas fa-circle" style="font-size: 8px;"></i> Workflow Running
+                    </span>
+                </div>
+                <div class="card-body workflow-timeline">
+                    <div class="workflow-step">
+                        <div class="step-icon completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-name">Alert Received</div>
+                            <div class="step-detail">Prometheus alert PostgreSQLConnectionPoolExhausted triggered</div>
+                        </div>
+                        <div class="step-duration">2s</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-name">Incident Created</div>
+                            <div class="step-detail">Auto-created INC0015847 with priority 1-Critical</div>
+                        </div>
+                        <div class="step-duration">2s</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-name">Smart Assignment</div>
+                            <div class="step-detail">Assigned to Rajkumar Madhu (On-Call DBA)</div>
+                        </div>
+                        <div class="step-duration">2s</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon running">
+                            <i class="fas fa-cog fa-spin"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-name">Running Diagnostics</div>
+                            <div class="step-detail">Collecting slow queries, connection stats, lock analysis...</div>
+                        </div>
+                        <div class="step-duration">8s...</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon pending">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-name">Execute Remediation</div>
+                            <div class="step-detail">Terminate idle connections, restart connection pooler</div>
+                        </div>
+                        <div class="step-duration">Pending</div>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon pending">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="step-content">
+                            <div class="step-name">Notify & Escalate</div>
+                            <div class="step-detail">Send Slack notification, update PagerDuty</div>
+                        </div>
+                        <div class="step-duration">Pending</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes & Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title"><i class="fas fa-comments"></i> Notes & Activity</span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="work-notes">Work Notes</div>
+                        <div class="tab" data-tab="comments">Customer Comments</div>
+                        <div class="tab" data-tab="activity">Activity Log</div>
+                    </div>
+                    <div class="tab-content active" id="work-notes" style="padding: 16px;">
+                        <div class="notes-list">
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <div class="note-author">
+                                        <div class="note-author-avatar">RM</div>
+                                        <span class="note-author-name">Rajkumar Madhu</span>
+                                    </div>
+                                    <span class="note-time">2 min ago</span>
+                                </div>
+                                <div class="note-content">
+                                    Running pg_stat_activity to identify long-running queries. Found 3 queries running for >5 minutes. Preparing to terminate with pg_terminate_backend().
+                                </div>
+                            </div>
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <div class="note-author">
+                                        <div class="note-author-avatar">ST</div>
+                                        <span class="note-author-name">StackStorm</span>
+                                    </div>
+                                    <span class="note-time">5 min ago</span>
+                                </div>
+                                <div class="note-content">
+                                    [AUTO] Diagnostic scan completed. Identified 45 idle connections from trading-api service. Slow query analysis shows index missing on orders.created_at column.
+                                </div>
+                            </div>
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <div class="note-author">
+                                        <div class="note-author-avatar">PR</div>
+                                        <span class="note-author-name">Prometheus</span>
+                                    </div>
+                                    <span class="note-time">12 min ago</span>
+                                </div>
+                                <div class="note-content">
+                                    [AUTO] Alert fired: PostgreSQLConnectionPoolExhausted. Current usage: 91.4%. Threshold: 85%. Affected service: trading-api.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="note-input-wrapper">
+                            <textarea class="note-input" rows="3" placeholder="Add a work note..."></textarea>
+                            <button class="btn btn-primary" style="align-self: flex-end;">
+                                <i class="fas fa-paper-plane"></i> Post
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="comments" style="padding: 16px;">
+                        <p style="color: var(--text-secondary); text-align: center; padding: 40px;">No customer comments yet.</p>
+                    </div>
+                    <div class="tab-content" id="activity" style="padding: 16px;">
+                        <p style="color: var(--text-secondary);">Activity log would show all field changes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <!-- SLA Widget -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">SLA Status</div>
+                <div class="sla-widget">
+                    <div class="sla-time">1h 48m</div>
+                    <div class="sla-label">Time to Resolution Remaining</div>
+                    <div class="sla-progress">
+                        <div class="sla-progress-bar" style="width: 25%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Time -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Response Metrics</div>
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1; background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 18px; font-weight: 700; color: var(--success);">45s</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">First Response</div>
+                    </div>
+                    <div style="flex: 1; background: #f9fafb; padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 18px; font-weight: 700; color: var(--info);">12m</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Age</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Quick Actions</div>
+                <div class="quick-actions">
+                    <button class="quick-action-btn">
+                        <i class="fas fa-terminal"></i>
+                        <div class="action-text">
+                            <div class="title">SSH to Server</div>
+                            <div class="desc">Connect to prod-db-01</div>
+                        </div>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-redo"></i>
+                        <div class="action-text">
+                            <div class="title">Restart PgBouncer</div>
+                            <div class="desc">Connection pooler restart</div>
+                        </div>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-skull"></i>
+                        <div class="action-text">
+                            <div class="title">Kill Idle Connections</div>
+                            <div class="desc">Terminate 45 idle sessions</div>
+                        </div>
+                    </button>
+                    <button class="quick-action-btn">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="action-text">
+                            <div class="title">View in Grafana</div>
+                            <div class="desc">Full metrics dashboard</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Timeline</div>
+                <div class="timeline">
+                    <div class="timeline-item current">
+                        <div class="timeline-time">Now</div>
+                        <div class="timeline-text">Running diagnostics</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">3 min ago</div>
+                        <div class="timeline-text">Assigned to Rajkumar M.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">5 min ago</div>
+                        <div class="timeline-text">State changed to In Progress</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">12 min ago</div>
+                        <div class="timeline-text">Incident created from alert</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-time">12 min ago</div>
+                        <div class="timeline-text">Alert triggered in Prometheus</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Items -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Related Records</div>
+                <div class="related-item">
+                    <div class="item-icon change">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-id">CHG0012456</div>
+                        <div class="item-name">PgBouncer Config Update</div>
+                    </div>
+                </div>
+                <div class="related-item">
+                    <div class="item-icon problem">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-id">PRB0003421</div>
+                        <div class="item-name">Connection Leaks</div>
+                    </div>
+                </div>
+                <div class="related-item">
+                    <div class="item-icon ci">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <div class="item-info">
+                        <div class="item-id">CI: prod-db-01</div>
+                        <div class="item-name">PostgreSQL Primary</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assigned To -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Assigned To</div>
+                <div style="display: flex; align-items: center; gap: 12px; background: #f9fafb; padding: 12px; border-radius: 8px;">
+                    <div class="user-avatar" style="width: 40px; height: 40px; font-size: 14px;">RM</div>
+                    <div>
+                        <div style="font-weight: 600;">Rajkumar Madhu</div>
+                        <div style="font-size: 11px; color: var(--text-secondary);">Sr. DevOps Engineer</div>
+                        <div style="font-size: 11px; color: var(--success);"><i class="fas fa-phone"></i> +91-917-677-2077</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+                this.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Grafana Chart
+        const ctx = document.getElementById('cpuChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.5)');
+        gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['14:05', '14:10', '14:15', '14:20', '14:25', '14:30', '14:32'],
+                datasets: [{
+                    label: 'Pool Usage %',
+                    data: [65, 72, 78, 85, 88, 91, 91.4],
+                    borderColor: '#ef4444',
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#ef4444'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(255,255,255,0.1)'
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6b7280'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Simulate live log updates
+        setInterval(() => {
+            const logStream = document.querySelector('.log-stream');
+            const newLog = document.createElement('div');
+            newLog.className = 'log-line';
+            const now = new Date();
+            const time = now.toTimeString().substr(0, 8);
+            newLog.innerHTML = `
+                <span class="timestamp">${time.substr(0, 5)}</span>
+                <span class="level warn">WARN</span>
+                <span class="message">Connection pool monitor: ${Math.floor(Math.random() * 10 + 85)}% utilized</span>
+            `;
+            logStream.insertBefore(newLog, logStream.firstChild);
+
+            // Keep only last 10 logs
+            while (logStream.children.length > 10) {
+                logStream.removeChild(logStream.lastChild);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

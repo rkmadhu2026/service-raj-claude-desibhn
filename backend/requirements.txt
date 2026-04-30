@@ -1,0 +1,23 @@
+# Pin in CI with pip-compile if you add many deps.
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic-settings==2.6.1
+python-multipart==0.0.18
+email-validator==2.2.0
+
+# DB + migrations
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+psycopg[binary]==3.2.12
+alembic==1.14.0
+aiosqlite==0.20.0
+
+# Auth
+passlib[bcrypt]==1.7.4
+# bcrypt 4.1+ breaks passlib 1.7.4; keep 4.0.x until passlib is replaced.
+bcrypt==4.0.1
+pyjwt==2.10.1
+redis==5.2.1
+
+# Production WSGI/ASGI process manager (optional; use in Dockerfile CMD)
+gunicorn==23.0.0

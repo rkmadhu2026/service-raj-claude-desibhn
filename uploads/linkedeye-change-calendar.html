@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Calendar | LinkedEye-FinSpot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary-navy: #0f1c3f;
+            --primary-blue: #2563eb;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --bg-body: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f1c3f;
+            --text-secondary: #6b7785;
+            --border-color: #e5e8eb;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-body); color: var(--text-primary); font-size: 13px; }
+
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--primary-navy); z-index: 200; }
+        .sidebar-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--info) 0%, var(--purple) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-logo i { color: #fff; font-size: 20px; }
+        .sidebar-brand { color: #fff; }
+        .sidebar-brand h1 { font-size: 16px; font-weight: 700; }
+        .sidebar-brand span { font-size: 10px; color: rgba(255,255,255,0.6); }
+        .sidebar-nav { padding: 16px 12px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-item.active { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .nav-item i { width: 20px; text-align: center; }
+        .nav-item .nav-badge { background: var(--warning); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-left: auto; }
+
+        .header { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .search-box { position: relative; width: 300px; }
+        .search-box input { width: 100%; padding: 10px 16px 10px 40px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; }
+        .search-box input:focus { outline: none; border-color: var(--primary-blue); }
+        .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .header-btn { width: 40px; height: 40px; border: none; background: transparent; border-radius: 8px; cursor: pointer; color: #6b7280; position: relative; }
+        .header-btn:hover { background: #f3f4f6; }
+        .header-btn .badge { position: absolute; top: 6px; right: 6px; width: 18px; height: 18px; background: var(--danger); color: #fff; font-size: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; }
+
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 24px; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .page-title p { font-size: 13px; color: var(--text-secondary); }
+        .page-actions { display: flex; gap: 12px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; border: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-secondary { background: #fff; color: var(--text-primary); border: 1px solid var(--border-color); }
+
+        .calendar-toolbar { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .view-toggle { display: flex; background: #f3f4f6; padding: 4px; border-radius: 8px; }
+        .view-btn { padding: 8px 16px; border: none; background: transparent; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--text-secondary); }
+        .view-btn.active { background: #fff; color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .calendar-nav { display: flex; align-items: center; gap: 16px; }
+        .nav-btn { width: 36px; height: 36px; border: 1px solid var(--border-color); background: #fff; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .nav-btn:hover { background: #f9fafb; }
+        .current-date { font-size: 18px; font-weight: 600; min-width: 180px; text-align: center; }
+        .today-btn { padding: 8px 16px; border: 1px solid var(--border-color); background: #fff; border-radius: 6px; font-size: 13px; cursor: pointer; }
+        .today-btn:hover { background: #f9fafb; }
+
+        .legend { display: flex; gap: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-dot.standard { background: var(--success); }
+        .legend-dot.normal { background: var(--warning); }
+        .legend-dot.emergency { background: var(--danger); }
+
+        .calendar-grid { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); background: #f9fafb; border-bottom: 1px solid var(--border-color); }
+        .calendar-header-cell { padding: 12px; text-align: center; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; }
+        .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .calendar-cell { min-height: 140px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 8px; position: relative; }
+        .calendar-cell:nth-child(7n) { border-right: none; }
+        .calendar-cell.other-month { background: #fafbfc; }
+        .calendar-cell.today { background: rgba(37, 99, 235, 0.05); }
+        .calendar-cell.today::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--primary-blue); }
+        .cell-date { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .calendar-cell.other-month .cell-date { color: var(--text-secondary); }
+
+        .change-event { padding: 6px 8px; border-radius: 6px; font-size: 11px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .change-event:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .change-event.standard { background: rgba(16, 185, 129, 0.15); color: #059669; border-left: 3px solid var(--success); }
+        .change-event.normal { background: rgba(245, 158, 11, 0.15); color: #b45309; border-left: 3px solid var(--warning); }
+        .change-event.emergency { background: rgba(239, 68, 68, 0.15); color: #dc2626; border-left: 3px solid var(--danger); }
+        .change-event .time { font-weight: 600; }
+        .change-event .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .maintenance-window { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%); border-top: 2px dashed var(--purple); padding: 4px 8px; font-size: 10px; color: var(--purple); }
+
+        .upcoming-changes { margin-top: 24px; }
+        .section-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title i { color: var(--primary-blue); }
+
+        .change-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .change-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; transition: all 0.2s; cursor: pointer; }
+        .change-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .change-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .change-id { font-weight: 600; color: var(--primary-blue); }
+        .change-type-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+        .change-type-badge.standard { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .change-type-badge.normal { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .change-type-badge.emergency { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .change-card-title { font-size: 14px; font-weight: 500; margin-bottom: 12px; line-height: 1.4; }
+        .change-card-meta { display: flex; gap: 16px; font-size: 11px; color: var(--text-secondary); }
+        .change-card-meta i { margin-right: 4px; }
+        .change-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); }
+        .approvals { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+        .approval-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .approval-dot.approved { background: var(--success); }
+        .approval-dot.pending { background: var(--warning); }
+        .risk-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .risk-badge.low { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .risk-badge.medium { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .risk-badge.high { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-eye"></i></div>
+            <div class="sidebar-brand"><h1>LinkedEye</h1><span>FinSpot Enterprise</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="linkedeye-dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+            <a href="linkedeye-incidents.html" class="nav-item"><i class="fas fa-exclamation-triangle"></i><span>Incidents</span></a>
+            <a href="linkedeye-change-calendar.html" class="nav-item active"><i class="fas fa-code-branch"></i><span>Changes</span><span class="nav-badge">7</span></a>
+            <a href="linkedeye-problem-detail.html" class="nav-item"><i class="fas fa-search"></i><span>Problems</span></a>
+            <a href="linkedeye-network-topology.html" class="nav-item"><i class="fas fa-network-wired"></i><span>Network</span></a>
+            <a href="linkedeye-assets.html" class="nav-item"><i class="fas fa-cubes"></i><span>Assets</span></a>
+            <a href="linkedeye-reports.html" class="nav-item"><i class="fas fa-file-alt"></i><span>Reports</span></a>
+            <a href="linkedeye-integrations.html" class="nav-item"><i class="fas fa-plug"></i><span>Integrations</span></a>
+        </nav>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search changes...">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn"><i class="fas fa-bell"></i><span class="badge">3</span></button>
+            <div class="user-avatar">RM</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Change Calendar</h1>
+                <p>Scheduled changes and maintenance windows</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary"><i class="fas fa-download"></i> Export iCal</button>
+                <a href="linkedeye-change-new.html" class="btn btn-primary"><i class="fas fa-plus"></i> New Change</a>
+            </div>
+        </div>
+
+        <!-- Calendar Toolbar -->
+        <div class="calendar-toolbar">
+            <div class="view-toggle">
+                <button class="view-btn">Week</button>
+                <button class="view-btn active">Month</button>
+                <button class="view-btn">List</button>
+            </div>
+            <div class="calendar-nav">
+                <button class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+                <span class="current-date">December 2025</span>
+                <button class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+                <button class="today-btn">Today</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot standard"></div> Standard</div>
+                <div class="legend-item"><div class="legend-dot normal"></div> Normal</div>
+                <div class="legend-item"><div class="legend-dot emergency"></div> Emergency</div>
+            </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-grid">
+            <div class="calendar-header">
+                <div class="calendar-header-cell">Sun</div>
+                <div class="calendar-header-cell">Mon</div>
+                <div class="calendar-header-cell">Tue</div>
+                <div class="calendar-header-cell">Wed</div>
+                <div class="calendar-header-cell">Thu</div>
+                <div class="calendar-header-cell">Fri</div>
+                <div class="calendar-header-cell">Sat</div>
+            </div>
+            <div class="calendar-body">
+                <!-- Week 1 -->
+                <div class="calendar-cell other-month"><div class="cell-date">30</div></div>
+                <div class="calendar-cell"><div class="cell-date">1</div></div>
+                <div class="calendar-cell"><div class="cell-date">2</div></div>
+                <div class="calendar-cell"><div class="cell-date">3</div></div>
+                <div class="calendar-cell"><div class="cell-date">4</div></div>
+                <div class="calendar-cell"><div class="cell-date">5</div></div>
+                <div class="calendar-cell"><div class="cell-date">6</div></div>
+
+                <!-- Week 2 -->
+                <div class="calendar-cell"><div class="cell-date">7</div></div>
+                <div class="calendar-cell"><div class="cell-date">8</div></div>
+                <div class="calendar-cell">
+                    <div class="cell-date">9</div>
+                    <div class="change-event normal" onclick="location.href='linkedeye-change-detail.html'">
+                        <span class="time">22:00</span>
+                        <span class="title">Patch Update</span>
+                    </div>
+                </div>
+                <div class="calendar-cell">
+                    <div class="cell-date">10</div>
+                    <div class="change-event standard">
+                        <span class="time">14:00</span>
+                        <span class="title">Backup Config</span>
+                    </div>
+                </div>
+                <div class="calendar-cell">
+                    <div class="cell-date">11</div>
+                    <div class="change-event normal" onclick="location.href='linkedeye-change-detail.html'">
+                        <span class="time">10:00</span>
+                        <span class="title">Network VLAN</span>
+                    </div>
+                </div>
+                <div class="calendar-cell">
+                    <div class="cell-date">12</div>
+                    <div class="change-event emergency">
+                        <span class="time">02:00</span>
+                        <span class="title">DB Upgrade</span>
+                    </div>
+                </div>
+                <div class="calendar-cell">
+                    <div class="cell-date">13</div>
+                    <div class="maintenance-window"><i class="fas fa-wrench"></i> Maint. Window</div>
+                </div>
+
+                <!-- Week 3 -->
+                <div class="calendar-cell">
+                    <div class="cell-date">14</div>
+                    <div class="maintenance-window"><i class="fas fa-wrench"></i> Maint. Window</div>
+                </div>
+                <div class="calendar-cell"><div class="cell-date">15</div></div>
+                <div class="calendar-cell"><div class="cell-date">16</div></div>
+                <div class="calendar-cell">
+                    <div class="cell-date">17</div>
+                    <div class="change-event standard">
+                        <span class="time">18:00</span>
+                        <span class="title">SSL Cert Renew</span>
+                    </div>
+                </div>
+                <div class="calendar-cell"><div class="cell-date">18</div></div>
+                <div class="calendar-cell">
+                    <div class="cell-date">19</div>
+                    <div class="change-event normal">
+                        <span class="time">23:00</span>
+                        <span class="title">API Deploy</span>
+                    </div>
+                </div>
+                <div class="calendar-cell"><div class="cell-date">20</div></div>
+
+                <!-- Week 4 -->
+                <div class="calendar-cell"><div class="cell-date">21</div></div>
+                <div class="calendar-cell"><div class="cell-date">22</div></div>
+                <div class="calendar-cell"><div class="cell-date">23</div></div>
+                <div class="calendar-cell today">
+                    <div class="cell-date">24</div>
+                    <div class="change-event standard">
+                        <span class="time">09:00</span>
+                        <span class="title">Monitoring Update</span>
+                    </div>
+                </div>
+                <div class="calendar-cell"><div class="cell-date">25</div></div>
+                <div class="calendar-cell"><div class="cell-date">26</div></div>
+                <div class="calendar-cell"><div class="cell-date">27</div></div>
+
+                <!-- Week 5 -->
+                <div class="calendar-cell"><div class="cell-date">28</div></div>
+                <div class="calendar-cell"><div class="cell-date">29</div></div>
+                <div class="calendar-cell">
+                    <div class="cell-date">30</div>
+                    <div class="change-event normal">
+                        <span class="time">22:00</span>
+                        <span class="title">Year-End Backup</span>
+                    </div>
+                </div>
+                <div class="calendar-cell"><div class="cell-date">31</div></div>
+                <div class="calendar-cell other-month"><div class="cell-date">1</div></div>
+                <div class="calendar-cell other-month"><div class="cell-date">2</div></div>
+                <div class="calendar-cell other-month"><div class="cell-date">3</div></div>
+            </div>
+        </div>
+
+        <!-- Upcoming Changes -->
+        <div class="upcoming-changes">
+            <h2 class="section-title"><i class="fas fa-calendar-check"></i> Upcoming Changes (Next 7 Days)</h2>
+            <div class="change-cards">
+                <div class="change-card" onclick="location.href='linkedeye-change-detail.html'">
+                    <div class="change-card-header">
+                        <span class="change-id">CHG0012456</span>
+                        <span class="change-type-badge normal">Normal</span>
+                    </div>
+                    <div class="change-card-title">Network VLAN Configuration Update for Trading Floor</div>
+                    <div class="change-card-meta">
+                        <span><i class="fas fa-calendar"></i> Dec 11, 22:00</span>
+                        <span><i class="fas fa-clock"></i> 90 min</span>
+                    </div>
+                    <div class="change-card-footer">
+                        <div class="approvals">
+                            <span class="approval-dot approved"></span>
+                            <span class="approval-dot approved"></span>
+                            <span class="approval-dot pending"></span>
+                            <span>2/3 Approved</span>
+                        </div>
+                        <span class="risk-badge medium">Medium Risk</span>
+                    </div>
+                </div>
+
+                <div class="change-card">
+                    <div class="change-card-header">
+                        <span class="change-id">CHG0012457</span>
+                        <span class="change-type-badge emergency">Emergency</span>
+                    </div>
+                    <div class="change-card-title">PostgreSQL Database Version Upgrade - Critical Security Patch</div>
+                    <div class="change-card-meta">
+                        <span><i class="fas fa-calendar"></i> Dec 12, 02:00</span>
+                        <span><i class="fas fa-clock"></i> 4 hours</span>
+                    </div>
+                    <div class="change-card-footer">
+                        <div class="approvals">
+                            <span class="approval-dot approved"></span>
+                            <span class="approval-dot approved"></span>
+                            <span class="approval-dot approved"></span>
+                            <span>3/3 Approved</span>
+                        </div>
+                        <span class="risk-badge high">High Risk</span>
+                    </div>
+                </div>
+
+                <div class="change-card">
+                    <div class="change-card-header">
+                        <span class="change-id">CHG0012458</span>
+                        <span class="change-type-badge standard">Standard</span>
+                    </div>
+                    <div class="change-card-title">SSL Certificate Renewal for Trading API Endpoints</div>
+                    <div class="change-card-meta">
+                        <span><i class="fas fa-calendar"></i> Dec 17, 18:00</span>
+                        <span><i class="fas fa-clock"></i> 30 min</span>
+                    </div>
+                    <div class="change-card-footer">
+                        <div class="approvals">
+                            <span class="approval-dot approved"></span>
+                            <span>Pre-approved</span>
+                        </div>
+                        <span class="risk-badge low">Low Risk</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

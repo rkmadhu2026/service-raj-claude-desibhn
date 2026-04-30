@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Change Request | LinkedEye-FinSpot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary-navy: #0f1c3f; --primary-blue: #2563eb; --sidebar-width: 260px; --header-height: 56px; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6; --purple: #8b5cf6; --bg-body: #f4f6f9; --bg-card: #ffffff; --text-primary: #0f1c3f; --text-secondary: #6b7785; --border-color: #e5e8eb; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-body); color: var(--text-primary); font-size: 13px; }
+
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: var(--primary-navy); z-index: 200; }
+        .sidebar-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--info) 0%, var(--purple) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-logo i { color: #fff; font-size: 20px; }
+        .sidebar-brand { color: #fff; }
+        .sidebar-brand h1 { font-size: 16px; font-weight: 700; }
+        .sidebar-brand span { font-size: 10px; color: rgba(255,255,255,0.6); }
+        .sidebar-nav { padding: 16px 12px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: 8px; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-item.active { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .nav-item i { width: 20px; text-align: center; }
+
+        .header { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 24px; z-index: 100; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--primary-blue); }
+        .breadcrumb .separator { color: var(--border-color); }
+        .breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 24px; max-width: 900px; }
+        .page-header { margin-bottom: 24px; }
+        .page-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .page-header p { font-size: 13px; color: var(--text-secondary); }
+
+        .change-type-selector { display: flex; gap: 16px; margin-bottom: 24px; }
+        .type-option { flex: 1; padding: 20px; border: 2px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .type-option:hover { border-color: #d1d5db; }
+        .type-option.selected { border-color: var(--primary-blue); background: rgba(37, 99, 235, 0.05); }
+        .type-option .type-icon { width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .type-option.standard .type-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .type-option.normal .type-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .type-option.emergency .type-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .type-option .type-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .type-option .type-desc { font-size: 11px; color: var(--text-secondary); }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 24px; }
+        .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+        .card-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .card-title i { color: var(--primary-blue); }
+        .card-body { padding: 20px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+        .form-group label .required { color: var(--danger); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+
+        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+        .schedule-row { display: flex; gap: 16px; align-items: flex-end; }
+        .schedule-row .form-group { flex: 1; }
+        .duration-display { padding: 12px; background: #f9fafb; border-radius: 8px; text-align: center; }
+        .duration-display .value { font-size: 18px; font-weight: 700; color: var(--primary-blue); }
+        .duration-display .label { font-size: 11px; color: var(--text-secondary); }
+
+        .ci-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .ci-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f3f4f6; border-radius: 20px; font-size: 12px; }
+        .ci-chip .remove { cursor: pointer; color: var(--text-secondary); }
+        .ci-chip .remove:hover { color: var(--danger); }
+
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; padding: 20px; border-top: 1px solid var(--border-color); background: #f9fafb; border-radius: 0 0 12px 12px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%); color: #fff; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-secondary { background: #fff; color: var(--text-primary); border: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-eye"></i></div>
+            <div class="sidebar-brand"><h1>LinkedEye</h1><span>FinSpot Enterprise</span></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="linkedeye-dashboard.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+            <a href="linkedeye-incidents.html" class="nav-item"><i class="fas fa-exclamation-triangle"></i><span>Incidents</span></a>
+            <a href="linkedeye-change-calendar.html" class="nav-item active"><i class="fas fa-code-branch"></i><span>Changes</span></a>
+            <a href="linkedeye-assets.html" class="nav-item"><i class="fas fa-cubes"></i><span>Assets</span></a>
+        </nav>
+    </aside>
+
+    <header class="header">
+        <div class="breadcrumb">
+            <a href="linkedeye-dashboard.html">Dashboard</a><span class="separator">/</span>
+            <a href="linkedeye-change-calendar.html">Changes</a><span class="separator">/</span>
+            <span class="current">Create New</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Create Change Request</h1>
+            <p>Submit a change request for approval and scheduling</p>
+        </div>
+
+        <div class="change-type-selector">
+            <div class="type-option standard" onclick="selectType(this, 'standard')">
+                <div class="type-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="type-name">Standard</div>
+                <div class="type-desc">Pre-approved, low risk</div>
+            </div>
+            <div class="type-option normal selected" onclick="selectType(this, 'normal')">
+                <div class="type-icon"><i class="fas fa-code-branch"></i></div>
+                <div class="type-name">Normal</div>
+                <div class="type-desc">Requires CAB approval</div>
+            </div>
+            <div class="type-option emergency" onclick="selectType(this, 'emergency')">
+                <div class="type-icon"><i class="fas fa-bolt"></i></div>
+                <div class="type-name">Emergency</div>
+                <div class="type-desc">Urgent, expedited review</div>
+            </div>
+        </div>
+
+        <form id="changeForm">
+            <div class="card">
+                <div class="card-header"><span class="card-title"><i class="fas fa-edit"></i> Change Information</span></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Short Description <span class="required">*</span></label>
+                        <input type="text" placeholder="Brief description of the change" required>
+                    </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select><option>Infrastructure</option><option>Network</option><option>Database</option><option>Application</option><option>Security</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Subcategory</label>
+                            <select><option>Network</option><option>Server</option><option>Storage</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Risk Level</label>
+                            <select><option>Low</option><option selected>Medium</option><option>High</option></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title"><i class="fas fa-tasks"></i> Implementation Plan</span></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Implementation Steps <span class="required">*</span></label>
+                        <textarea placeholder="Step 1: Backup current configs&#10;Step 2: Apply changes&#10;Step 3: Verify changes&#10;..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Backout Plan <span class="required">*</span></label>
+                        <textarea placeholder="Step 1: Restore from backup&#10;Step 2: Verify restoration&#10;..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title"><i class="fas fa-calendar"></i> Schedule</span></div>
+                <div class="card-body">
+                    <div class="schedule-row">
+                        <div class="form-group">
+                            <label>Start Date & Time</label>
+                            <input type="datetime-local" value="2025-12-11T22:00">
+                        </div>
+                        <div class="form-group">
+                            <label>End Date & Time</label>
+                            <input type="datetime-local" value="2025-12-11T23:30">
+                        </div>
+                        <div class="form-group">
+                            <label>Duration</label>
+                            <div class="duration-display"><div class="value">90</div><div class="label">minutes</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title"><i class="fas fa-server"></i> Affected CIs</span></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Configuration Items</label>
+                        <input type="text" placeholder="Search and add CIs...">
+                        <div class="ci-selector">
+                            <div class="ci-chip"><i class="fas fa-network-wired"></i> SW-01.fs-dx-le <span class="remove">&times;</span></div>
+                            <div class="ci-chip"><i class="fas fa-network-wired"></i> SW-02.fs-dx-le <span class="remove">&times;</span></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Estimated Downtime</label>
+                            <input type="text" value="0 minutes">
+                        </div>
+                        <div class="form-group">
+                            <label>Business Justification</label>
+                            <input type="text" placeholder="Why is this change needed?">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="button" class="btn btn-secondary"><i class="fas fa-save"></i> Save Draft</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit for Approval</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        function selectType(el, type) {
+            document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+        document.getElementById('changeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Change request submitted! CHG0012459 created.');
+            window.location.href = 'linkedeye-change-calendar.html';
+        });
+    </script>
+</body>
+</html>

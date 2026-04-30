@@ -1,0 +1,49 @@
+# Full stack: Postgres + API (migrations on boot) + static UI
+# Usage: docker compose up --build
+#   API:  http://localhost:8000/api/healthz
+#   App:  http://localhost:8000/
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nexearn
+      POSTGRES_PASSWORD: nexearn
+      POSTGRES_DB: nexearn
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexearn -d nexearn"]
+      interval: 5s
+      timeout: 4s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+
+  web:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      NEXEARN_APP_ENV: development
+      NEXEARN_DEBUG: "1"
+      NEXEARN_DATABASE_URL: postgresql+asyncpg://nexearn:nexearn@db:5432/nexearn
+      NEXEARN_JWT_SECRET: "docker-compose-dev-secret-min-32-chars-ok-!!"
+      NEXEARN_REDIS_URL: redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  pgdata:

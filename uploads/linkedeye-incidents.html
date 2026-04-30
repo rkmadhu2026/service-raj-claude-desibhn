@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedEye-FinSpot | Incident Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-navy: #0f1c3f;
+            --primary-blue: #2563eb;
+            --primary-blue-light: #3b82f6;
+            --sidebar-width: 260px;
+            --header-height: 56px;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --purple: #8b5cf6;
+            --bg-body: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-primary: #0f1c3f;
+            --text-secondary: #6b7785;
+            --border-color: #e5e8eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        /* Sidebar - Same as dashboard */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-navy);
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-blue-light) 0%, var(--purple) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-logo i {
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .sidebar-brand {
+            color: #fff;
+        }
+
+        .sidebar-brand h1 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .sidebar-brand span {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .nav-item span {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .nav-item .nav-badge {
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .nav-item .nav-badge.warning {
+            background: var(--warning);
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .env-selector {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .env-selector .env-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+
+        .env-selector .env-info {
+            flex: 1;
+            color: #fff;
+        }
+
+        .env-selector .env-info .env-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .env-selector .env-info .env-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .env-selector i {
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 320px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            background: #f9fafb;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: #fff;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            position: relative;
+        }
+
+        .header-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .header-btn .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .user-menu:hover {
+            background: #f3f4f6;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info .name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-info .role {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 24px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-mini {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-mini-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-mini.critical .stat-mini-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .stat-mini.high .stat-mini-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .stat-mini.medium .stat-mini-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .stat-mini.low .stat-mini-icon {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+
+        .stat-mini.resolved .stat-mini-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .stat-mini-content .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-mini-content .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-dropdown {
+            position: relative;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .filter-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary-blue);
+            background: rgba(37, 99, 235, 0.05);
+            color: var(--primary-blue);
+        }
+
+        .view-tabs {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 4px;
+        }
+
+        .view-tab {
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .view-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .view-tab.active {
+            background: #fff;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bulk-actions {
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bulk-actions.show {
+            display: flex;
+        }
+
+        .selected-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding-right: 8px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Table */
+        .incidents-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .incidents-table th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #f9fafb;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .incidents-table th.sortable {
+            cursor: pointer;
+        }
+
+        .incidents-table th.sortable:hover {
+            color: var(--text-primary);
+        }
+
+        .incidents-table th .sort-icon {
+            margin-left: 4px;
+            opacity: 0.3;
+        }
+
+        .incidents-table th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--primary-blue);
+        }
+
+        .incidents-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .incidents-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .incidents-table tr.selected {
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .incidents-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Checkbox */
+        .checkbox-cell {
+            width: 40px;
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-blue);
+            cursor: pointer;
+        }
+
+        /* Incident Number */
+        .inc-number {
+            font-weight: 600;
+            color: var(--primary-blue);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .inc-number:hover {
+            text-decoration: underline;
+        }
+
+        .inc-source {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .inc-source.auto {
+            color: var(--purple);
+        }
+
+        /* Title */
+        .inc-title {
+            max-width: 320px;
+        }
+
+        .inc-title .title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .inc-title .ci-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: #f3f4f6;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .inc-title .ci-link:hover {
+            background: #e5e7eb;
+            color: var(--text-primary);
+        }
+
+        /* Priority Badge */
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .priority-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .priority-badge.critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .priority-badge.high {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .priority-badge.medium {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .priority-badge.low {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-badge.open {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .status-badge.in-progress {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-badge.resolved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-badge.closed {
+            background: rgba(107, 114, 128, 0.1);
+            color: #6b7280;
+        }
+
+        /* Assignee */
+        .assignee {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assignee-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--purple) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .assignee-info .name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .assignee-info .team {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .unassigned {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Age */
+        .age {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .age.critical {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .age.warning {
+            color: var(--warning);
+            font-weight: 500;
+        }
+
+        /* SLA */
+        .sla-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sla-bar {
+            width: 60px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .sla-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .sla-bar-fill.good {
+            background: var(--success);
+        }
+
+        .sla-bar-fill.warning {
+            background: var(--warning);
+        }
+
+        .sla-bar-fill.critical {
+            background: var(--danger);
+        }
+
+        .sla-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Actions */
+        .row-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .row-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row-action-btn:hover {
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            background: #f9fafb;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 12px;
+        }
+
+        .page-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .page-btn.active {
+            background: var(--primary-blue);
+            border-color: var(--primary-blue);
+            color: #fff;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Quick View Drawer */
+        .quick-view-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 300;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .quick-view-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .quick-view-drawer {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 480px;
+            height: 100vh;
+            background: var(--bg-card);
+            z-index: 301;
+            transition: right 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quick-view-overlay.open .quick-view-drawer {
+            right: 0;
+        }
+
+        .quick-view-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quick-view-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .quick-view-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f3f4f6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-view-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .quick-view-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .quick-view-footer .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-eye"></i>
+            </div>
+            <div class="sidebar-brand">
+                <h1>LinkedEye</h1>
+                <span>FinSpot Enterprise</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a href="linkedeye-dashboard.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="linkedeye-incidents.html" class="nav-item active">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Incidents</span>
+                    <span class="nav-badge">23</span>
+                </a>
+                <a href="linkedeye-change-calendar.html" class="nav-item">
+                    <i class="fas fa-code-branch"></i>
+                    <span>Changes</span>
+                    <span class="nav-badge warning">7</span>
+                </a>
+                <a href="linkedeye-problem-detail.html" class="nav-item">
+                    <i class="fas fa-search"></i>
+                    <span>Problems</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Infrastructure</div>
+                <a href="linkedeye-network-topology.html" class="nav-item">
+                    <i class="fas fa-network-wired"></i>
+                    <span>Network Topology</span>
+                </a>
+                <a href="linkedeye-network-devices.html" class="nav-item">
+                    <i class="fas fa-server"></i>
+                    <span>Network Devices</span>
+                </a>
+                <a href="linkedeye-assets.html" class="nav-item">
+                    <i class="fas fa-cubes"></i>
+                    <span>Asset Management</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Analytics</div>
+                <a href="linkedeye-reports.html" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reports</span>
+                </a>
+                <a href="linkedeye-analytics.html" class="nav-item">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Insights</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Settings</div>
+                <a href="linkedeye-integrations.html" class="nav-item">
+                    <i class="fas fa-plug"></i>
+                    <span>Integrations</span>
+                </a>
+                <a href="linkedeye-users.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Users & Teams</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="env-selector">
+                <div class="env-dot"></div>
+                <div class="env-info">
+                    <div class="env-name">fs-mum-indmoney-prod-le</div>
+                    <div class="env-label">Production Environment</div>
+                </div>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search incidents by ID, title, CI...">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </button>
+            <button class="header-btn" title="Help">
+                <i class="fas fa-question-circle"></i>
+            </button>
+            <div class="user-menu">
+                <div class="user-avatar">RM</div>
+                <div class="user-info">
+                    <div class="name">Rajkumar M.</div>
+                    <div class="role">Sr. DevOps Engineer</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Incident Management</h1>
+                <p>Manage and track all incidents across environments</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <a href="linkedeye-incident-new.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Incident
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-mini critical">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="value">3</div>
+                    <div class="label">Critical</div>
+                </div>
+            </div>
+            <div class="stat-mini high">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="value">8</div>
+                    <div class="label">High</div>
+                </div>
+            </div>
+            <div class="stat-mini medium">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="value">12</div>
+                    <div class="label">Medium</div>
+                </div>
+            </div>
+            <div class="stat-mini low">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="value">5</div>
+                    <div class="label">Low</div>
+                </div>
+            </div>
+            <div class="stat-mini resolved">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="value">156</div>
+                    <div class="label">Resolved (30d)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="filter-dropdown">
+                    <button class="filter-btn">
+                        <i class="fas fa-filter"></i>
+                        Priority
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="filter-dropdown">
+                    <button class="filter-btn">
+                        Status
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="filter-dropdown">
+                    <button class="filter-btn">
+                        Assignee
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="filter-dropdown">
+                    <button class="filter-btn">
+                        Environment
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <div class="filter-dropdown">
+                    <button class="filter-btn">
+                        <i class="fas fa-calendar"></i>
+                        Last 7 Days
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <div class="bulk-actions" id="bulkActions">
+                    <span class="selected-count"><span id="selectedCount">0</span> selected</span>
+                    <button class="btn btn-secondary" style="padding: 6px 12px;">
+                        <i class="fas fa-user-plus"></i> Assign
+                    </button>
+                    <button class="btn btn-secondary" style="padding: 6px 12px;">
+                        <i class="fas fa-check"></i> Resolve
+                    </button>
+                </div>
+                <div class="view-tabs">
+                    <button class="view-tab active">My Incidents</button>
+                    <button class="view-tab">Unassigned</button>
+                    <button class="view-tab">All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incidents Table -->
+        <div class="card">
+            <table class="incidents-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox" id="selectAll">
+                        </th>
+                        <th class="sortable sorted">
+                            Incident <i class="fas fa-sort-up sort-icon"></i>
+                        </th>
+                        <th class="sortable">Title</th>
+                        <th class="sortable">Priority <i class="fas fa-sort sort-icon"></i></th>
+                        <th class="sortable">Status <i class="fas fa-sort sort-icon"></i></th>
+                        <th>Assignee</th>
+                        <th class="sortable">Age <i class="fas fa-sort sort-icon"></i></th>
+                        <th>SLA</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr onclick="openQuickView(this)" style="cursor: pointer;">
+                        <td class="checkbox-cell" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <a href="linkedeye-incident-detail.html" class="inc-number" onclick="event.stopPropagation()">INC0015847</a>
+                            <div class="inc-source auto">
+                                <i class="fas fa-robot"></i> Prometheus
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">Database Connection Pool Exhaustion - Critical Impact on Trading</div>
+                            <span class="ci-link">
+                                <i class="fas fa-server"></i> prod-db-01.fs-mum-indmoney-prod-le
+                            </span>
+                        </td>
+                        <td><span class="priority-badge critical">1 - Critical</span></td>
+                        <td><span class="status-badge in-progress">In Progress</span></td>
+                        <td>
+                            <div class="assignee">
+                                <div class="assignee-avatar">RM</div>
+                                <div class="assignee-info">
+                                    <div class="name">Rajkumar M.</div>
+                                    <div class="team">Infrastructure Ops</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="age critical">12m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill good" style="width: 25%"></div>
+                                </div>
+                                <span class="sla-text">1h 48m</span>
+                            </div>
+                        </td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Assign"><i class="fas fa-user-plus"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <span class="inc-number">INC0015846</span>
+                            <div class="inc-source auto">
+                                <i class="fas fa-robot"></i> Alertmanager
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">High CPU Alert - Trading Engine Overloaded</div>
+                            <span class="ci-link">
+                                <i class="fas fa-server"></i> trading-engine-01.neo-prod-le
+                            </span>
+                        </td>
+                        <td><span class="priority-badge critical">1 - Critical</span></td>
+                        <td><span class="status-badge open">Open</span></td>
+                        <td>
+                            <div class="assignee">
+                                <div class="assignee-avatar">SK</div>
+                                <div class="assignee-info">
+                                    <div class="name">Siva K.</div>
+                                    <div class="team">Network Ops</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="age critical">18m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill warning" style="width: 60%"></div>
+                                </div>
+                                <span class="sla-text">48m</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Assign"><i class="fas fa-user-plus"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <span class="inc-number">INC0015845</span>
+                            <div class="inc-source">
+                                <i class="fas fa-user"></i> Manual
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">Network Latency Spike - Core Switch Performance</div>
+                            <span class="ci-link">
+                                <i class="fas fa-network-wired"></i> sw-core-01.fs-dx-le
+                            </span>
+                        </td>
+                        <td><span class="priority-badge high">2 - High</span></td>
+                        <td><span class="status-badge in-progress">In Progress</span></td>
+                        <td>
+                            <div class="assignee">
+                                <div class="assignee-avatar">EP</div>
+                                <div class="assignee-info">
+                                    <div class="name">Edukondalu P.</div>
+                                    <div class="team">Network Ops</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="age">45m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill good" style="width: 20%"></div>
+                                </div>
+                                <span class="sla-text">3h 15m</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Assign"><i class="fas fa-user-plus"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <span class="inc-number">INC0015844</span>
+                            <div class="inc-source auto">
+                                <i class="fas fa-robot"></i> Prometheus
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">Disk Space Warning - Log Volume Approaching Threshold</div>
+                            <span class="ci-link">
+                                <i class="fas fa-server"></i> app-server-03.lemonn-mum-le
+                            </span>
+                        </td>
+                        <td><span class="priority-badge medium">3 - Medium</span></td>
+                        <td><span class="status-badge open">Open</span></td>
+                        <td>
+                            <div class="assignee">
+                                <div class="assignee-avatar">DP</div>
+                                <div class="assignee-info">
+                                    <div class="name">Devendrareddy P.</div>
+                                    <div class="team">Infrastructure</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="age">1h 23m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill good" style="width: 15%"></div>
+                                </div>
+                                <span class="sla-text">6h 37m</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Assign"><i class="fas fa-user-plus"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <span class="inc-number">INC0015843</span>
+                            <div class="inc-source">
+                                <i class="fas fa-user"></i> Manual
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">API Response Time Degradation - Gateway Slowdown</div>
+                            <span class="ci-link">
+                                <i class="fas fa-cloud"></i> api-gateway.pl-prod-le
+                            </span>
+                        </td>
+                        <td><span class="priority-badge medium">3 - Medium</span></td>
+                        <td><span class="status-badge resolved">Resolved</span></td>
+                        <td>
+                            <div class="assignee">
+                                <div class="assignee-avatar">RA</div>
+                                <div class="assignee-info">
+                                    <div class="name">Rajkumar A.</div>
+                                    <div class="team">DBA Team</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="age">2h 15m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill good" style="width: 100%"></div>
+                                </div>
+                                <span class="sla-text">Met</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Reopen"><i class="fas fa-redo"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <span class="inc-number">INC0015842</span>
+                            <div class="inc-source auto">
+                                <i class="fas fa-robot"></i> StackStorm
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">SSL Certificate Expiry Warning - 7 Days Remaining</div>
+                            <span class="ci-link">
+                                <i class="fas fa-lock"></i> trading.finspot.com
+                            </span>
+                        </td>
+                        <td><span class="priority-badge medium">3 - Medium</span></td>
+                        <td><span class="status-badge pending">Pending</span></td>
+                        <td>
+                            <span class="unassigned">Unassigned</span>
+                        </td>
+                        <td><span class="age">3h 45m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill good" style="width: 40%"></div>
+                                </div>
+                                <span class="sla-text">4h 15m</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Assign"><i class="fas fa-user-plus"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox">
+                        </td>
+                        <td>
+                            <span class="inc-number">INC0015841</span>
+                            <div class="inc-source">
+                                <i class="fas fa-user"></i> Manual
+                            </div>
+                        </td>
+                        <td class="inc-title">
+                            <div class="title">Backup Job Failed - Daily Database Backup</div>
+                            <span class="ci-link">
+                                <i class="fas fa-database"></i> backup-server.fs-dr-le
+                            </span>
+                        </td>
+                        <td><span class="priority-badge low">4 - Low</span></td>
+                        <td><span class="status-badge in-progress">In Progress</span></td>
+                        <td>
+                            <div class="assignee">
+                                <div class="assignee-avatar">HB</div>
+                                <div class="assignee-info">
+                                    <div class="name">Hoysala B.</div>
+                                    <div class="team">DevOps Lead</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="age">5h 12m</span></td>
+                        <td>
+                            <div class="sla-indicator">
+                                <div class="sla-bar">
+                                    <div class="sla-bar-fill good" style="width: 25%"></div>
+                                </div>
+                                <span class="sla-text">18h 48m</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="row-action-btn" title="View"><i class="fas fa-eye"></i></button>
+                                <button class="row-action-btn" title="Assign"><i class="fas fa-user-plus"></i></button>
+                                <button class="row-action-btn" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <div class="pagination-info">
+                    Showing <strong>1-7</strong> of <strong>47</strong> incidents
+                </div>
+                <div class="pagination-controls">
+                    <button class="page-btn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <span style="color: var(--text-secondary);">...</span>
+                    <button class="page-btn">7</button>
+                    <button class="page-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quick View Drawer -->
+    <div class="quick-view-overlay" id="quickViewOverlay" onclick="closeQuickView()">
+        <div class="quick-view-drawer" onclick="event.stopPropagation()">
+            <div class="quick-view-header">
+                <h3>INC0015847 - Quick View</h3>
+                <button class="quick-view-close" onclick="closeQuickView()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="quick-view-body">
+                <!-- Quick view content would be dynamically populated -->
+                <p>Loading incident details...</p>
+            </div>
+            <div class="quick-view-footer">
+                <a href="linkedeye-incident-detail.html" class="btn btn-primary">
+                    <i class="fas fa-external-link-alt"></i> Open Full View
+                </a>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-check"></i> Resolve
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Select All Checkbox
+        document.getElementById('selectAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+                cb.closest('tr').classList.toggle('selected', this.checked);
+            });
+            updateBulkActions();
+        });
+
+        // Individual Checkboxes
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                this.closest('tr').classList.toggle('selected', this.checked);
+                updateBulkActions();
+            });
+        });
+
+        function updateBulkActions() {
+            const selected = document.querySelectorAll('.row-checkbox:checked').length;
+            document.getElementById('selectedCount').textContent = selected;
+            document.getElementById('bulkActions').classList.toggle('show', selected > 0);
+        }
+
+        // View Tabs
+        document.querySelectorAll('.view-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Quick View
+        function openQuickView(row) {
+            document.getElementById('quickViewOverlay').classList.add('open');
+        }
+
+        function closeQuickView() {
+            document.getElementById('quickViewOverlay').classList.remove('open');
+        }
+
+        // Pagination
+        document.querySelectorAll('.page-btn:not(:disabled)').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!this.querySelector('i')) {
+                    document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
