@@ -14,6 +14,7 @@ This is a **static prototype** — no build system, no bundler, no package manag
 
 **Static-only (no API auth)**: open `NexEarn Platform.html` in a browser, or serve the repo root (JSX still loads, but `NexApi` login/register need the FastAPI origin):
 ```
+./serve.sh          # convenience wrapper around python3 -m http.server 8000
 npx serve .
 # or
 python3 -m http.server 8000
@@ -28,6 +29,8 @@ Docker: `docker compose up --build` (see `docker-compose.yml` and `backend/Docke
 - All settings use the `NEXEARN_` env prefix (`NEXEARN_DATABASE_URL`, `NEXEARN_JWT_SECRET`, `NEXEARN_SITE_ROOT`, `NEXEARN_DEBUG`, `NEXEARN_APP_ENV`, `NEXEARN_CORS_ORIGINS`, `NEXEARN_ALLOWED_HOSTS`, `NEXEARN_REDIS_URL`). See `backend/.env.example`.
 
 **Tests** (backend): `cd backend && pytest` (or `pytest tests/test_auth.py::test_name` for one). Requires `pip install -r requirements-dev.txt`. There is no frontend test suite.
+
+Test fixture pattern: `NEXEARN_JWT_SECRET` must be set via `os.environ` **before** importing any `app.*` modules (import order matters). Each test that changes `NEXEARN_DATABASE_URL` must call `get_settings.cache_clear()` before and after to avoid cross-test state leakage. Tests spin up a temporary SQLite DB via `tmp_path`; the default dev DB is `backend/.dev.db`.
 
 **Kubernetes**: manifests in `k8s/` (namespace, deployment, service, ingress) wired together via `kustomization.yaml` — apply with `kubectl apply -k k8s/`.
 
@@ -45,7 +48,7 @@ Docker: `docker compose up --build` (see `docker-compose.yml` and `backend/Docke
 7. `screens/*.jsx` — Individual page/screen components (one file per screen).
 8. `app.jsx` — Root `<App>` component with client-side routing (simple state-based, not URL-based).
 
-**Cache busting**: many `<script>` tags in `NexEarn Platform.html` carry `?v=N` query strings (e.g. `app.jsx?v=8`, `cmdb.jsx?v=5`). When you edit one of those JSX files, **bump its `v=` number in the HTML** so browsers don't serve a stale cached copy.
+**Cache busting**: `<script>` tags in `NexEarn Platform.html` use `?v=N` query strings to bust the browser cache. Some scripts (e.g. `tweaks-panel.jsx`, `data-itsm.jsx`, `primitives.jsx`) currently lack a version suffix — when first editing one of those, **add `?v=1`** to its tag and increment on every subsequent edit. For scripts that already carry `?v=N`, bump the number on each edit.
 
 **Adding a new screen**: create `screens/<name>.jsx`, register a `<script type="text/babel">` tag in `NexEarn Platform.html` (after `shell.jsx`), add a route entry in `NAV` in `shell.jsx`, and render it from the route switch in `app.jsx`. The screen component must attach itself via `Object.assign(window, { ScreenName })` — there are no ES imports.
 
@@ -78,3 +81,7 @@ Docker: `docker compose up --build` (see `docker-compose.yml` and `backend/Docke
 - `LinkedEye Platform.html` is the previous-branded entry point — `NexEarn Platform.html` is the current one.
 - The `scraps/` directory contains napkin sketch files.
 - `index.html` is a tiny redirect/shim used by the static `Dockerfile` + `nginx.conf` deployment path; the FastAPI backend serves `NexEarn Platform.html` directly.
+- One file can export multiple screen components: `reports.jsx` exports both `ReportsScreen` and `SLAScreen` (both registered in `app.jsx`).
+- `screens/hr.jsx` and `screens/studio.jsx` exist but are **not** loaded in `NexEarn Platform.html` and have no route entries in `app.jsx` — they are WIP and invisible at runtime.
+- `IntegrationsScreen` lives in `screens/integrations.jsx` (loaded before `app.jsx` in `NexEarn Platform.html`).
+- `bcrypt` is pinned to `4.0.x` in `requirements.txt` because `passlib 1.7.4` breaks with `bcrypt 4.1+`; do not upgrade `bcrypt` until `passlib` is replaced.
